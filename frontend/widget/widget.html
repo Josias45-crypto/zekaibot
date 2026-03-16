@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechBot — Soporte Técnico</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+  .demo-page {
+    width: 100%; max-width: 480px; height: 100vh;
+    display: flex; flex-direction: column;
+    background: #fff; box-shadow: 0 0 40px rgba(0,0,0,0.12);
+    position: relative;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a56db, #0ea5e9);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .header-info .name { color: #fff; font-weight: 600; font-size: 15px; }
+  .header-info .status {
+    color: rgba(255,255,255,0.85); font-size: 12px;
+    display: flex; align-items: center; gap: 5px; margin-top: 2px;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4ade80; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1; overflow-y: auto; padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+  /* WELCOME */
+  .welcome {
+    text-align: center; padding: 24px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .welcome-icon { font-size: 40px; }
+  .welcome h3 { font-size: 16px; font-weight: 600; color: #1e293b; }
+  .welcome p { font-size: 13px; color: #64748b; line-height: 1.5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
+  .chip {
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 16px; padding: 5px 12px;
+    font-size: 12px; color: #475569; cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
+
+  /* BUBBLES */
+  .msg-row { display: flex; gap: 8px; animation: fadeUp .25s ease; }
+  .msg-row.user { flex-direction: row-reverse; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    flex-shrink: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 13px; margin-top: 2px;
+  }
+  .msg-avatar.bot { background: linear-gradient(135deg,#1a56db,#0ea5e9); color:#fff; }
+  .msg-avatar.user { background: #e2e8f0; }
+
+  .msg-content { max-width: 78%; display: flex; flex-direction: column; gap: 3px; }
+  .msg-row.user .msg-content { align-items: flex-end; }
+
+  .bubble {
+    padding: 10px 14px; border-radius: 16px;
+    font-size: 14px; line-height: 1.55;
+  }
+  .bubble.bot {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px; color: #1e293b;
+  }
+  .bubble.user {
+    background: linear-gradient(135deg,#1a56db,#0ea5e9);
+    color: #fff; border-bottom-right-radius: 4px;
+  }
+  .msg-time { font-size: 10px; color: #94a3b8; padding: 0 4px; }
+
+  /* INTENT TAG */
+  .intent-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 10px; padding: 2px 8px;
+    font-size: 11px; color: #1d4ed8; font-weight: 500;
+    margin-bottom: 3px; width: fit-content;
+  }
+
+  /* TICKET CARD */
+  .ticket-card {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 12px; padding: 12px; margin-top: 4px;
+    font-size: 12px;
+  }
+  .ticket-card .tc-title { font-weight: 600; color: #92400e; margin-bottom: 4px; }
+  .ticket-card .tc-ref { color: #b45309; font-weight: 600; }
+  .ticket-card .tc-body { color: #78350f; line-height: 1.5; }
+
+  /* TYPING */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 12px 14px; }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #94a3b8; animation: blink 1.2s infinite;
+  }
+  .typing span:nth-child(2){animation-delay:.2s}
+  .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.3;transform:scale(1)}40%{opacity:1;transform:scale(1.2)}}
+
+  /* INPUT */
+  .input-area {
+    padding: 12px 16px; border-top: 1px solid #e2e8f0;
+    background: #fff; flex-shrink: 0;
+  }
+  .input-wrap {
+    display: flex; gap: 8px; align-items: flex-end;
+    background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 24px; padding: 8px 8px 8px 16px;
+    transition: border-color .2s;
+  }
+  .input-wrap:focus-within { border-color: #1a56db; }
+  textarea {
+    flex: 1; background: transparent; border: none; outline: none;
+    font-family: 'Inter', sans-serif; font-size: 14px;
+    color: #1e293b; resize: none; max-height: 100px;
+    padding: 2px 0; line-height: 1.5;
+  }
+  textarea::placeholder { color: #94a3b8; }
+  .send-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg,#1a56db,#0ea5e9);
+    border: none; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; transition: transform .15s, opacity .15s;
+    color: #fff; font-size: 16px;
+  }
+  .send-btn:hover { transform: scale(1.08); }
+  .send-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .input-hint { font-size: 11px; color: #94a3b8; margin-top: 6px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="demo-page">
+
+  <div class="header">
+    <div class="avatar">🤖</div>
+    <div class="header-info">
+      <div class="name">Jhordan — ZekaiTech</div>
+      <div class="status">
+        <div class="status-dot"></div>
+        En línea · Disponible 24/7
+      </div>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">🛠️</div>
+      <h3>¡Hola! Soy Jhordan 👋</h3>
+      <p>Soy el asistente virtual de <strong>SekaiTech</strong> — tu tienda de tecnología en Huánuco. Estoy aquí para ayudarte con precios, productos, soporte técnico y mucho más. ¡Pregúntame lo que necesitas!</p>
+      <div class="chips">
+        <span class="chip" onclick="quickSend('¿Qué laptops HP tienen disponibles?')">💻 Laptops HP</span>
+        <span class="chip" onclick="quickSend('¿Cuánto cuesta una impresora Epson?')">🖨️ Impresoras</span>
+        <span class="chip" onclick="quickSend('Necesito soporte técnico')">🔧 Soporte</span>
+        <span class="chip" onclick="quickSend('¿Cuáles son sus horarios y dirección?')">📍 Ubicación</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" rows="1" placeholder="Escribe tu consulta técnica..."
+        onkeydown="handleKey(event)" oninput="resize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+    <div class="input-hint">Enter para enviar · Shift+Enter para nueva línea</div>
+  </div>
+
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000/api/v1/chat/message';
+let sessionToken = localStorage.getItem('techbot_session') || crypto.randomUUID();
+localStorage.setItem('techbot_session', sessionToken);
+
+const INTENT_LABELS = {
+  diagnostico_error:      { label: 'Diagnóstico técnico', icon: '🔴' },
+  consulta_precio:        { label: 'Consulta de precio',  icon: '💰' },
+  compatibilidad:         { label: 'Compatibilidad',      icon: '🔗' },
+  seguimiento_reparacion: { label: 'Seguimiento',         icon: '📦' },
+  instalacion_driver:     { label: 'Driver / Software',   icon: '💾' },
+  soporte_urgente:        { label: 'Soporte urgente',     icon: '🚨' },
+  consulta_general:       { label: 'Consulta general',    icon: '💬' },
+};
+
+function now() {
+  return new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function quickSend(text) {
+  document.getElementById('input').value = text;
+  sendMessage();
+}
+
+function addUserBubble(text) {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div class="msg-avatar user">👤</div>
+    <div class="msg-content">
+      <div class="bubble user">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${now()}</div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addBotBubble(data) {
+  const msgs = document.getElementById('messages');
+  const intent = INTENT_LABELS[data.intent] || { label: data.intent, icon: '🤖' };
+  const text = data.message.replace(/\n/g,'<br>');
+
+  let ticketHtml = '';
+  if (data.ticket_code) {
+    ticketHtml = `
+      <div class="ticket-card">
+        <div class="tc-title">🎫 Ticket creado — Un agente te atenderá pronto</div>
+        <div class="tc-body">Referencia: <span class="tc-ref">${data.ticket_code}</span><br>
+        Puedes usar este código para dar seguimiento a tu caso.</div>
+      </div>`;
+  }
+
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.innerHTML = `
+    <div class="msg-avatar bot">🤖</div>
+    <div class="msg-content">
+      <div class="intent-tag">${intent.icon} ${intent.label}</div>
+      <div class="bubble bot">${text}</div>
+      ${ticketHtml}
+      <div class="msg-time">${now()}</div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('messages');
+  const id = 'typing-' + Date.now();
+  const row = document.createElement('div');
+  row.className = 'msg-row'; row.id = id;
+  row.innerHTML = `
+    <div class="msg-avatar bot">🤖</div>
+    <div class="msg-content">
+      <div class="bubble bot" style="padding:10px 16px">
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  resize(input);
+  document.getElementById('sendBtn').disabled = true;
+  addUserBubble(text);
+  const typingId = addTyping();
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': sessionToken
+      },
+      body: JSON.stringify({ content: text, channel: 'web' })
+    });
+
+    const data = await res.json();
+    document.getElementById(typingId)?.remove();
+    addBotBubble(data);
+  } catch (err) {
+    document.getElementById(typingId)?.remove();
+    addBotBubble({
+      message: 'Lo siento, hubo un problema de conexión. Por favor intenta de nuevo.',
+      intent: 'consulta_general',
+      ticket_code: null
+    });
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('input').focus();
+}
+</script>
+</body>
+</html>
